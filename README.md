@@ -37,4 +37,4 @@ python project.py
 ```
 
 Or, if you are using PyCharm, you can click on the green play button in the top right corner of the editor.  
-<img src="img.png" alt="Run in PyCharm" width="300"></img>
+<img src="images/img.png" alt="Run in PyCharm" width="300"></img>

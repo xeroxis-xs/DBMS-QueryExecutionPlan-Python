@@ -1,11 +1,16 @@
 from dash import Dash, html, dcc, callback, Output, Input
+import dash_bootstrap_components as dbc
+from interface_components.navbar import navbar
 import plotly.express as px
 import pandas as pd
 
 
 class Interface:
     def __init__(self):
-        self.app = Dash(__name__)
+        self.app = Dash(
+            __name__,
+            external_stylesheets=[dbc.themes.BOOTSTRAP]
+        )
         self.df = self.read_data()
         self.set_layout()
         self.set_callbacks()
@@ -16,10 +21,27 @@ class Interface:
 
     def set_layout(self):
         self.app.layout = html.Div([
-            html.H1(children='Title of Dash App', style={'textAlign':'center'}),
-            dcc.Dropdown(self.df.country.unique(), 'Canada', id='dropdown-selection'),
-            dcc.Graph(id='graph-content')
+            navbar(),
+            dbc.Container([
+                dbc.Row([
+                    dbc.Col([
+                        html.H1(children='Query Execution Plan', style={'textAlign':'center'})
+                    ])
+                ]),
+                dbc.Row([
+                    dbc.Col([
+                        dcc.Dropdown(self.df.country.unique(), 'Canada', id='dropdown-selection')
+                    ])
+                ]),
+                dbc.Row([
+                    dbc.Col([
+                        dcc.Graph(id='graph-content')
+                    ])
+                ])
+            ]),
         ])
+
+
 
     def set_callbacks(self):
         @self.app.callback(
@@ -31,5 +53,5 @@ class Interface:
             return px.line(dff, x='year', y='pop')
 
     def run(self):
-        self.app.run()
+        self.app.run(debug=True)
         print('Interface run')
