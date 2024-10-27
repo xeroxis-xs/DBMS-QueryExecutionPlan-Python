@@ -7,7 +7,7 @@ The broad aims of the project are as follows:
 - Retrieve the estimated cost of the AQP and compare its cost with the QEP.
 
 ## ERD
-<img src="images/erd.svg" alt="ERD" width="600"></img>
+<img src="images/ERD.svg" alt="ERD" width="600"></img>
 
 ## Prerequisites
 - Python 3.10
