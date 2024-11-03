@@ -47,7 +47,7 @@ if __name__ == "__main__":
     # Don't forget to close the connection when done
     if conn is not None:
         try:
-             result_qtree = get_query_execution_plan("SELECT * FROM orders, lineitem  WHERE o_orderstatus = 'O' AND l_linestatus = 'N';", cur)
+             result_qtree = get_query_execution_plan("SELECT o_custkey, COUNT(o_orderkey) FROM orders, lineitem WHERE o_orderstatus = 'O' AND l_linestatus = 'N' GROUP BY o_custkey;", cur)
              query_tree.query_tree.print_query_tree(result_qtree.head_node)
         except Exception as e:
             print(f"The error '{e}' occurred")
