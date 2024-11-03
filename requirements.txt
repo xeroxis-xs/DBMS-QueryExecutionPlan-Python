@@ -3,3 +3,8 @@ pandas==2.2.3
 dash-bootstrap-components==1.6.0
 psycopg2-binary==2.9.10
 python-dotenv==1.0.1
+igraph==0.11.8
+networkx==3.4.2
+psycopg2~=2.9.10
+plotly~=5.24.1
+feffery-markdown-components=0.2.10
