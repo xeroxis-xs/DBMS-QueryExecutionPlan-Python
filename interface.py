@@ -2,7 +2,7 @@ from dash import Dash, html, dcc, callback_context, Output, Input, State
 import dash_bootstrap_components as dbc
 from interface_components.navbar import navbar
 from db.db import Database
-from interface_components.graph import Graph
+from preprocessing import Graph
 import pandas as pd
 import psycopg2
 import plotly.graph_objs as go
