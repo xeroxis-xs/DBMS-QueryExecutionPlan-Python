@@ -401,7 +401,7 @@ class Interface:
         )
         def show_dropdown(click_data):
             if click_data:
-                print(click_data)
+                # print(click_data)
                 node_id = click_data['points'][0]['id']
                 node_type = click_data['points'][0]['text']
 
