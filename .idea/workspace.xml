@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="df98fe30-43eb-4284-a191-23a7eca71e1c" name="Changes" comment="added graph" />
+    <list default="true" id="df98fe30-43eb-4284-a191-23a7eca71e1c" name="Changes" comment="added back the create script and tbl files" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,21 +30,21 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RESET_MODE" value="HARD" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "xeroxis-xs"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;xeroxis-xs&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/xeroxis-xs/DBMS-QueryExecutionPlan-Python.git",
-    "accountId": "6ac5a54c-f469-436b-b6e1-d36b3ee69882"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/xeroxis-xs/DBMS-QueryExecutionPlan-Python.git&quot;,
+    &quot;accountId&quot;: &quot;6ac5a54c-f469-436b-b6e1-d36b3ee69882&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="2oLXL6ada9IN3LntmBT75C2DG6S" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -55,9 +55,11 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.graph.executor": "Run",
+    "Python.project.executor": "Run",
     "Python.run project.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "xs",
+    "git-widget-placeholder": "xs-2",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -66,6 +68,42 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\XiSheng\Documents\Github\DBMS-QueryExecutionPlan-Python\db" />
+      <recent name="C:\Users\XiSheng\Documents\Github\DBMS-QueryExecutionPlan-Python" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="project" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="DBMS-QueryExecutionPlan-Python" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/project.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.project" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -83,6 +121,7 @@
       <option name="presentableId" value="Default" />
       <updated>1730649772044</updated>
       <workItem from="1730649773709" duration="11522000" />
+      <workItem from="1730661349662" duration="25355000" />
     </task>
     <task id="LOCAL-00001" summary="added graph">
       <option name="closed" value="true" />
@@ -92,7 +131,31 @@
       <option name="project" value="LOCAL" />
       <updated>1730661063482</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="merge back">
+      <option name="closed" value="true" />
+      <created>1730661505057</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1730661505057</updated>
+    </task>
+    <task id="LOCAL-00003" summary="update graph">
+      <option name="closed" value="true" />
+      <created>1730733161333</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1730733161333</updated>
+    </task>
+    <task id="LOCAL-00004" summary="added back the create script and tbl files">
+      <option name="closed" value="true" />
+      <created>1730733533361</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1730733533361</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -111,9 +174,14 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="added graph" />
-    <option name="LAST_COMMIT_MESSAGE" value="added graph" />
+    <MESSAGE value="merge back" />
+    <MESSAGE value="update graph" />
+    <MESSAGE value="added back the create script and tbl files" />
+    <option name="LAST_COMMIT_MESSAGE" value="added back the create script and tbl files" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/DBMS_QueryExecutionPlan_Python$graph.coverage" NAME="graph Coverage Results" MODIFIED="1730706457175" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/interface_components" />
     <SUITE FILE_PATH="coverage/DBMS_QueryExecutionPlan_Python$run_project.coverage" NAME="run project Coverage Results" MODIFIED="1730658885510" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$ProjectFileDir$" />
+    <SUITE FILE_PATH="coverage/DBMS_QueryExecutionPlan_Python$project.coverage" NAME="project Coverage Results" MODIFIED="1730715718085" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
