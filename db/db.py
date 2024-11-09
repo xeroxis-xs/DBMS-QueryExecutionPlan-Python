@@ -88,24 +88,7 @@ class Database:
         """
         query = f"EXPLAIN (FORMAT JSON) {query}"
         result, execution_time, error, _ = self.execute_query(query)
-        return json.dumps(result[0][0], indent=2), execution_time, error
-
-    def manipulate_qep(self, qep, changes):
-
-        plan_tree = json.loads(qep)['Plan']
-
-        self.apply_changes_to_plan(plan_tree, changes)
-
-        return json.dumps(plan_tree, indent=2)
-
-    def apply_changes_to_plan(self, plan_tree, changes):
-
-        # Change the node type of Hash Join to Merge Join
-        if 'Node Type' in plan_tree and plan_tree['Node Type'] == 'Hash Join' and 'change_to_merge_join' in changes:
-            for key, value in changes.items():
-                plan_tree[key] = value
-
-        # Recursively apply changes to the child nodes
-        if 'Plans' in plan_tree:
-            for plan in plan_tree['Plans']:
-                self.apply_changes_to_plan(plan, changes)
+        # Extract the total cost of the top-level plan
+        qep_cost = result[0]["Plan"]["Total Cost"]
+        qep_rows = result[0]["Plan"]["Plan Rows"]
+        return json.dumps(result[0][0], indent=2), qep_cost, qep_rows, execution_time, error

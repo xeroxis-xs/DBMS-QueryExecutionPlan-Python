@@ -21,6 +21,9 @@ class Interface:
         self.set_callbacks()
         self.db = None
         self.qep = None
+        self.qep_cost = None
+        self.modified_qep = None
+        self.modified_qep_cost = None
 
     def read_data(self):
         df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
@@ -339,7 +342,7 @@ class Interface:
 
             try:
                 # Get the query execution plan
-                self.qep, time_taken, error = self.db.get_qep(query)
+                self.qep, self.qep_cost, qep_rows, time_taken, error = self.db.get_qep(query)
 
                 if error:
                     raise psycopg2.Error(error)
