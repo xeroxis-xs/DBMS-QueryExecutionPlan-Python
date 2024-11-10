@@ -2,55 +2,21 @@ import networkx as nx
 import plotly.graph_objects as go
 
 
-class Graph:
-    def __init__(self):
-        self.G = nx.DiGraph()
-        self.nodes = []
-        self.edges = []
-        self.node_counter = 0 # for ID generation
-
-    def parse_qep(self, qep):
-        """Parse the QEP JSON into a format suitable for NetworkX."""
-
-        def traverse_plan(plan_tree, parent_id=None):
-            node_id = self.node_counter  # Use the counter as the node ID
-            self.node_counter += 1
-            node_label = plan_tree['Node Type']
-            total_cost = plan_tree.get('Total Cost', 0)
-            rows = plan_tree.get('Plan Rows', 0)
-            node_info = {
-                'id': node_id,
-                'label': node_label,
-                'cost': total_cost,
-                'rows': rows,
-                'info': plan_tree
-            }
-            # print(f"Appending node: {node_info}")
-            self.nodes.append(node_info)
-
-            if parent_id is not None:
-                # print(f"Appending edge: {parent_id} -> {node_id}")
-                self.edges.append((parent_id, node_id))
-
-            if 'Plans' in plan_tree:
-                for subplan in plan_tree['Plans']:
-                    # Recursively traverse the plan tree
-                    # print(f"Traversing subplan: {subplan['Node Type']}")
-                    traverse_plan(subplan, parent_id=node_id)
-
-        # Start traversing from the root plan
-        root_plan = qep[0]['Plan']
-        # Traverse the plan tree
-        traverse_plan(root_plan)
-
-    def print_graph(self):
-        print(self.nodes)
-        print(self.edges)
+class GraphPlot:
+    def __init__(self, graph):
+        self.G = graph
 
     def hierarchy_pos(self, G, root=None, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5):
-        '''
+        """
         Position nodes in a hierarchical layout.
-        '''
+        :param G: The graph to be laid out
+        :param root:  The root node of current branch
+        :param width:  Horizontal space allocated for this branch - avoids overlap with other branches
+        :param vert_gap:  Gap between levels of hierarchy
+        :param vert_loc:  Vertical location of root
+        :param xcenter:  Horizontal location of root
+        :return:
+        """
         if not nx.is_tree(G):
             raise TypeError('Cannot use hierarchy_pos on a graph that is not a tree')
 
@@ -71,14 +37,6 @@ class Graph:
             return pos
 
         return _hierarchy_pos(G, root, 0, width, vert_loc, xcenter, {})
-
-    def build_graph(self):
-        """Build the graph from the parsed QEP."""
-
-        for node in self.nodes:
-            self.G.add_node(node['id'], label=node['label'], cost=node['cost'], rows=node['rows'], info=node['info'])
-        for edge in self.edges:
-            self.G.add_edge(edge[0], edge[1])
 
     def plot_graph(self):
 
@@ -119,7 +77,10 @@ class Graph:
             x=node_x, y=node_y,
             mode='markers+text',
             textposition="bottom center",
-            textfont_size=14,
+            textfont=dict(
+                size=14,
+                color='black'
+            ),
             marker=dict(
                 size=20,
                 color=node_color,  # Set color to the list of costs
