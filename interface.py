@@ -58,7 +58,7 @@ class Interface:
                             dbc.Label("Database", html_for="dbname", width=3),
                             dbc.Col(
                                 dbc.Input(id="dbname", placeholder="Enter database name", type="text",
-                                          value="postgres"),
+                                          value="TPC-H"),
                                 width=9,
                             )
                         ], className="mb-3"),
@@ -189,8 +189,6 @@ class Interface:
                         html.H5([
                             html.B("QEP Graph")
                         ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
-                        dbc.Button(["Show QEP Graph", html.I(className="bi bi-diagram-3-fill ms-2")],
-                                   id="show-qep-graph", color="primary", className="my-3", disabled=True),
                         dbc.Button(["Show QEP Graph", html.I(className="bi bi-diagram-3-fill ms-2")],
                                    id="show-qep-graph", color="primary", className="my-3", disabled=True),
                         dbc.Alert(id="qep-graph-status", color="info", is_open=False),
