@@ -1,6 +1,7 @@
 from dash import Dash, html, dcc, callback_context, Output, Input, State
 import dash_bootstrap_components as dbc
 from interface_components.navbar import navbar
+from interface_components.graph_plot import GraphPlot
 from db.db import Database
 from preprocessing import Graph
 import pandas as pd
@@ -20,9 +21,12 @@ class Interface:
         self.set_callbacks()
         self.db = None
         self.qep = None
+<<<<<<< HEAD
         self.qep_cost = None
         self.modified_qep = None
         self.modified_qep_cost = None
+=======
+>>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
 
     def set_layout(self):
         self.app.layout = html.Div([
@@ -46,7 +50,7 @@ class Interface:
                         dbc.Row([
                             dbc.Label("Port", html_for="port", width=3),
                             dbc.Col(
-                                dbc.Input(id="port", placeholder="Enter port", type="number", value=5433),
+                                dbc.Input(id="port", placeholder="Enter port", type="number", value=5432),
                                 width=9,
                             )
                         ], className="mb-3"),
@@ -87,7 +91,7 @@ class Interface:
                             children=[
                                 html.P(id="table-time-taken", className="my-3"),
                                 html.Div(
-                                    style={"max-height": "400px", "overflow-y": "auto"},
+                                    style={"maxHeight": "400px", "overflowY": "auto"},
                                     children=[
                                         dbc.Table(
                                             id='table-schemas',
@@ -141,10 +145,10 @@ class Interface:
                                         html.P(id="query-time-taken", className="my-3"),
                                         html.P(id="query-rows-count", className="my-3"),
                                         html.Div(id="query-output", style={
-                                            "max-width": "100%",
-                                            "overflow-x": "auto",
-                                            "max-height": "400px",
-                                            "overflow-y": "auto"
+                                            "maxWidth": "100%",
+                                            "overflowX": "auto",
+                                            "maxHeight": "400px",
+                                            "overflowY": "auto"
                                         })
                                     ]
                                 ),
@@ -172,8 +176,13 @@ class Interface:
                                         fmc.FefferyMarkdown(
                                             id="qep-output",
                                             codeTheme="atom-dark",
+<<<<<<< HEAD
                                             codeBlockStyle={"max-height": "500px"},
                                             codeStyle={"font-size": "14px"}
+=======
+                                            codeBlockStyle={"maxHeight": "500px"},
+                                            codeStyle={"fontSize": "14px"}
+>>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
                                         ),
                                     ]
                                 ),
@@ -326,7 +335,7 @@ class Interface:
                         bordered=True,
                         hover=True,
                         style={
-                            "font-size": "14px",
+                            "fontSize": "14px",
                             "padding": "2px",
                             "margin": "0",
                         }
@@ -389,8 +398,13 @@ class Interface:
                 graph = Graph()
                 graph.parse_qep(qep_dict)
                 # graph.print_graph()
+<<<<<<< HEAD
                 graph.build_graph()
                 return dcc.Graph(id="qep-interactive-graph", figure=graph.plot_graph()), [
+=======
+                graph_plot = GraphPlot(graph.build_graph())
+                return dcc.Graph(id="qep-interactive-graph", figure=graph_plot.plot_graph()), [
+>>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
                     html.I(className="bi bi-check-circle-fill me-2"),
                     "QEP Graph generated successfully!"], "success", True
             else:
@@ -404,7 +418,11 @@ class Interface:
         )
         def show_dropdown(click_data):
             if click_data:
+<<<<<<< HEAD
                 # print(click_data)
+=======
+                print(click_data)
+>>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
                 node_id = click_data['points'][0]['id']
                 node_type = click_data['points'][0]['text']
 

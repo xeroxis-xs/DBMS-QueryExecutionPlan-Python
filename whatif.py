@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 from  db.db import Database
 
 commands = []
@@ -72,3 +73,7 @@ def whatif_query(db : Database, query : str, join : str | None, scan : str | Non
 class WhatIf:
     pass
 >>>>>>> 777c8ce86c01011e80c9c68680c910b10e7bb198
+=======
+class WhatIf:
+    pass
+>>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
