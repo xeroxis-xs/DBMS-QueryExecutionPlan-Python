@@ -12,6 +12,7 @@ import plotly.graph_objs as go
 import feffery_markdown_components as fmc
 import json
 import json
+from whatif import whatif_query
 
 
 class Interface:
@@ -25,6 +26,7 @@ class Interface:
         self.db = None
         self.qep = None
         self.qep_cost = None
+        self.qep_rows = None
         self.modified_qep = None
         self.modified_qep_cost = None
 
@@ -198,6 +200,8 @@ class Interface:
                                     id="loading-qep-graph",
                                     type="default",
                                     children=[
+                                        html.P(id="qep-cost", className="my-3"),
+                                        html.P(id="qep-rows-estimate", className="my-3"),
                                         html.Div(id="qep-graph", children=[
                                             dcc.Graph(id="qep-interactive-graph", figure=go.Figure(),
                                                       style={"display": "none"}),
@@ -220,6 +224,105 @@ class Interface:
                         dbc.Button(["Apply Changes", html.I(className="bi bi-check2-all ms-2")], id="apply-changes-button", color="primary", className="my-3", style={"display": "none"}),
                     ], width=6),
                 ]),
+                # What-If Queries Section
+                html.Hr(),
+                dbc.Row([
+                    dbc.Col([
+                        html.H5([
+                            html.B("What-If Queries")
+                        ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
+                        dbc.Row([
+                            dbc.Label("Select Join Type:", html_for="join-type-dropdown", width=3),
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id='join-type-dropdown',
+                                    options=[
+                                        {'label': 'No modification', 'value' : 'none'},
+                                        {'label': 'Hash Join', 'value': 'hash'},
+                                        {'label': 'Merge Join', 'value': 'merge'},
+                                        {'label': 'Nested Loop Join', 'value': 'nested'}
+                                    ],
+                                    value='none'
+                                ),
+                                width=9
+                            ),
+                        ], className="mb-3"),
+                        dbc.Row([
+                            dbc.Label("Select Scan Type:", html_for="scan-type-dropdown", width=3),
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id='scan-type-dropdown',
+                                    options=[
+                                        {'label': 'No modification', 'value' : 'none'},
+                                        {'label': 'Sequential Scan', 'value': 'seq'},
+                                        {'label': 'Index Scan', 'value': 'index'},
+                                        {'label': 'Bitmap Scan', 'value': 'bitmap'}
+                                    ],
+                                    value='none'
+                                ),
+                                width=9
+                            ),
+                        ], className="mb-3"),
+                        dbc.Row([
+                            dbc.Label("Select Aggregate Type:", html_for="aggregate-type-dropdown", width=3),
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id='aggregate-type-dropdown',
+                                    options=[
+                                        {'label': 'No modification', 'value': 'hash'},
+                                        {'label': 'Disable Hash Aggregate', 'value': 'no_hash'}
+                                    ],
+                                    value='hash'
+                                ),
+                                width=9
+                            ),
+                        ], className="mb-3"),
+                        dbc.Button(["Execute What-If Query", html.I(className="bi bi-play-fill ms-2")],
+                                id="execute-whatif-query-btn", color="primary", className="my-3"),
+                        dbc.Alert(id="whatif-query-status", color="info", is_open=False),
+                    ], width=12),
+                ], className="mb-5"),
+
+                dbc.Row([
+                    dbc.Col([
+                        html.H5([
+                            html.B("What-If QEP")
+                        ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
+                        dbc.Row([
+                            dbc.Col(
+                                dcc.Loading(
+                                    id="loading-whatif-qep",
+                                    type="default",
+                                    children=[
+                                        html.Div(id="whatif-qep-output", style={"maxHeight": "500px", "overflowY": "auto"})  # Display What-If QEP JSON
+                                    ]
+                                ),
+                            )
+                        ], className="mb-3"),
+                    ], width=6),
+
+                    dbc.Col([
+                        html.H5([
+                            html.B("What-If QEP Graph")
+                        ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
+                        dbc.Row([
+                            dbc.Col(
+                                dcc.Loading(
+                                    id="loading-whatif-qep-graph",
+                                    type="default",
+                                    children=[
+                                        html.P(id="whatif-cost", className="my-3"),
+                                        html.P(id="cost_difference", className="my-3"),
+                                        html.Div(id="whatif-qep-graph", children=[
+                                            dcc.Graph(id="updated-qep-graph", figure=go.Figure())
+                                        ])
+                                    ]
+                                ),
+                            )
+                        ], className="mb-3"),
+                    ], width=6),
+                ]),
+
                 dbc.Row(className="py-5"),
             ]),
         ])
@@ -365,7 +468,7 @@ class Interface:
 
             try:
                 # Get the query execution plan
-                self.qep, self.qep_cost, qep_rows, time_taken, error = self.db.get_qep(query)
+                self.qep, self.qep_cost, self.qep_rows, time_taken, error = self.db.get_qep(query)
 
                 if error:
                     raise psycopg2.Error(error)
@@ -382,11 +485,13 @@ class Interface:
             Output("qep-graph-status", "children"),
             Output("qep-graph-status", "color"),
             Output("qep-graph-status", "is_open"),
+            Output("qep-cost", "children"),
+            Output("qep-rows-estimate", "children"),
             Input("show-qep-graph", "n_clicks"),
         )
         def show_qep_graph(n_clicks):
             if n_clicks is None:
-                return None, "", "info", False
+                return None, "", "info", False, "", ""
 
             if self.qep:
                 qep_dict = json.loads(self.qep)
@@ -396,10 +501,10 @@ class Interface:
                 graph_plot = GraphPlot(graph.build_graph())
                 return dcc.Graph(id="qep-interactive-graph", figure=graph_plot.plot_graph()), [
                     html.I(className="bi bi-check-circle-fill me-2"),
-                    "QEP Graph generated successfully!"], "success", True
+                    "QEP Graph generated successfully!"], "success", True, f'Query Cost: {self.qep_cost}', f'Query Planner Output Rows Estimate: {self.qep_rows}'
             else:
                 return None, [html.I(className="bi bi-x-octagon-fill me-2"),
-                              "No QEP available to generate graph"], "danger", True
+                              "No QEP available to generate graph"], "danger", True, "", ""
 
         @self.app.callback(
             Output("dropdown-container", "children"),
@@ -496,6 +601,59 @@ class Interface:
                     ], {"display": "block"}
             else:
                 return None, {"display": "none"}
+    
+        @self.app.callback(
+            Output("whatif-query-status", "children"),
+            Output("whatif-query-status", "color"),
+            Output("whatif-query-status", "is_open"),
+            Output("whatif-qep-output", "children"),
+            Output("whatif-qep-graph", "children"),
+            Output("whatif-cost", "children"),
+            Output("cost_difference", "children"),
+            Input("execute-whatif-query-btn", "n_clicks"),
+            State("join-type-dropdown", "value"),
+            State("scan-type-dropdown", "value"),
+            State("aggregate-type-dropdown", "value"),
+            State("query-input", "value"),
+        )
+        def execute_whatif_query(n_clicks, join_type, scan_type, aggregate_type, query):
+            if n_clicks is None:
+                return "", "info", False, "", "", "", ""
+
+            try:
+                # Send the What-If parameters and query to the backend to get the new QEP
+                self.modified_qep, self.modified_qep_cost, modified_qep_rows, modified_execution_time, error = whatif_query(self.db, query, join_type, scan_type, aggregate_type)
+
+                if error:
+                    raise Exception(error)
+
+                # Displaying Updated QEP in JSON format
+                qep_markdown = fmc.FefferyMarkdown(
+                    markdownStr=f"```json\n{self.modified_qep}\n```", codeTheme="atom-dark", className="mt-3"
+                )
+
+                # Creating QEP Graph from the retrieved graph data
+                if self.modified_qep:
+                    modified_qep_dict = json.loads(self.modified_qep)
+                    modified_graph = Graph()
+                    modified_graph.parse_qep(modified_qep_dict)
+                    modified_graph_plot = GraphPlot(modified_graph.build_graph())
+                    modified_qep_graph = dcc.Graph(id="updated-qep-graph", figure=modified_graph_plot.plot_graph())
+                
+                perfomance_boost = 100 * (self.qep_cost - self.modified_qep_cost) / self.qep_cost 
+                cost_string = "Perfomance Boost (%):" if perfomance_boost >= 0 else "Perfomance Fall (%):"
+
+                return [
+                    html.I(className="bi bi-check-circle-fill me-2"), "What-If Query executed successfully!"
+                    ], "success", True, qep_markdown, modified_qep_graph, f'Whatif Query Cost: {self.modified_qep_cost}', f'{cost_string} {abs(perfomance_boost):.2f}'
+
+            except Exception as e:
+                # Handle any errors that occurred
+                return [
+                    html.I(className="bi bi-x-octagon-fill me-2"),
+                    "Error executing What-If query:",
+                    fmc.FefferyMarkdown(markdownStr=f"```sh\n{str(e)}\n```", codeTheme="atom-dark",
+                    className="mt-3")], "danger", True, "", "", "", ""
 
     def run(self):
         self.app.run(debug=True)
