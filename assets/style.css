@@ -1,0 +1,3 @@
+#qep-interactive-graph > div.js-plotly-plot > div.plot-container > div.user-select-none > svg.main-svg > g.draglayer {
+    cursor: pointer !important;
+}
