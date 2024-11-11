@@ -86,9 +86,12 @@ class Database:
         :param query: SQL query
         :return: JSON formatted query execution plan
         """
-        query = f"EXPLAIN (FORMAT JSON) {query}"
+        query = f"EXPLAIN (FORMAT JSON, ANALYZE) {query}"
         result, execution_time, error, _ = self.execute_query(query)
         # Extract the total cost of the top-level plan
-        qep_cost = result[0][0][0]["Plan"]["Total Cost"]
-        qep_rows = result[0][0][0]["Plan"]["Plan Rows"]
+        qep_cost = None
+        qep_rows = None
+        if result is not None:
+            qep_cost = result[0][0][0]["Plan"]["Total Cost"]
+            qep_rows = result[0][0][0]["Plan"]["Plan Rows"]
         return json.dumps(result[0][0], indent=2), qep_cost, qep_rows, execution_time, error

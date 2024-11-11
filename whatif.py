@@ -1,7 +1,7 @@
 
 from  db.db import Database
 
-commands = []
+
 
 #commands for default postgresql settings
 reset_commands = [
@@ -29,9 +29,10 @@ def execute_commands(db : Database, commands : list[str]):
     #commit the changes
     db.conn.commit()
 
-def whatif_query(db : Database, query : str, join : str | None, scan : str | None, aggregate: str | None):
+def whatif_query(db : Database, query : str, join : str, scan : str, aggregate: str):
+    commands = []
     #check for whatif queries regarding join
-    if join is not None:
+    if join != 'none':
         #disable all other joins apart from hash join
         if join == "hash":
             commands.extend(["SET enable_mergejoin = off;", "SET enable_nestloop = off;"])
@@ -42,7 +43,7 @@ def whatif_query(db : Database, query : str, join : str | None, scan : str | Non
         elif join == "nested":
             commands.extend(["SET enable_mergejoin = off;", "SET enable_hashjoin = off;"])
     #check for whatif queries regarding scan
-    if scan is not None:
+    if scan != 'none':
         #disable all other scan options apart from seqscan
         if scan == "seq":
             commands.extend(["SET enable_indexscan = off;", "SET enable_indexonlyscan = off;", "SET enable_bitmapscan = off;", "SET enable_tidscan = off;"])
@@ -53,9 +54,9 @@ def whatif_query(db : Database, query : str, join : str | None, scan : str | Non
         elif scan == "bitmap":
             commands.extend(["SET enable_indexscan = off;", "SET enable_indexonlyscan = off;", "SET enable_seqscan = off;", "SET enable_tidscan = off;"])
     #check for whatif queries regarding aggregation
-    if aggregate is not None:
+    if aggregate != 'hash':
         #disable hash aggregation
-        if aggregate == "disable_hash":
+        if aggregate == "no_hash":
             commands.append("SET enable_hashagg = off;")
     #configure the new settings
     execute_commands(db, commands)
