@@ -166,3 +166,4 @@ class Graph:
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
             )
         )
+

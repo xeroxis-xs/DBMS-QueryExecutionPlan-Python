@@ -2,12 +2,15 @@ from dash import Dash, html, dcc, callback_context, Output, Input, State
 import dash_bootstrap_components as dbc
 from interface_components.navbar import navbar
 from interface_components.graph_plot import GraphPlot
+from interface_components.graph_plot import GraphPlot
 from db.db import Database
 from preprocessing import Graph
 import pandas as pd
 import psycopg2
 import plotly.graph_objs as go
+import plotly.graph_objs as go
 import feffery_markdown_components as fmc
+import json
 import json
 
 
@@ -21,12 +24,9 @@ class Interface:
         self.set_callbacks()
         self.db = None
         self.qep = None
-<<<<<<< HEAD
         self.qep_cost = None
         self.modified_qep = None
         self.modified_qep_cost = None
-=======
->>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
 
     def set_layout(self):
         self.app.layout = html.Div([
@@ -176,13 +176,8 @@ class Interface:
                                         fmc.FefferyMarkdown(
                                             id="qep-output",
                                             codeTheme="atom-dark",
-<<<<<<< HEAD
                                             codeBlockStyle={"max-height": "500px"},
                                             codeStyle={"font-size": "14px"}
-=======
-                                            codeBlockStyle={"maxHeight": "500px"},
-                                            codeStyle={"fontSize": "14px"}
->>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
                                         ),
                                     ]
                                 ),
@@ -194,6 +189,8 @@ class Interface:
                         html.H5([
                             html.B("QEP Graph")
                         ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
+                        dbc.Button(["Show QEP Graph", html.I(className="bi bi-diagram-3-fill ms-2")],
+                                   id="show-qep-graph", color="primary", className="my-3", disabled=True),
                         dbc.Button(["Show QEP Graph", html.I(className="bi bi-diagram-3-fill ms-2")],
                                    id="show-qep-graph", color="primary", className="my-3", disabled=True),
                         dbc.Alert(id="qep-graph-status", color="info", is_open=False),
@@ -398,13 +395,8 @@ class Interface:
                 graph = Graph()
                 graph.parse_qep(qep_dict)
                 # graph.print_graph()
-<<<<<<< HEAD
-                graph.build_graph()
-                return dcc.Graph(id="qep-interactive-graph", figure=graph.plot_graph()), [
-=======
                 graph_plot = GraphPlot(graph.build_graph())
                 return dcc.Graph(id="qep-interactive-graph", figure=graph_plot.plot_graph()), [
->>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
                     html.I(className="bi bi-check-circle-fill me-2"),
                     "QEP Graph generated successfully!"], "success", True
             else:
@@ -418,11 +410,7 @@ class Interface:
         )
         def show_dropdown(click_data):
             if click_data:
-<<<<<<< HEAD
                 # print(click_data)
-=======
-                print(click_data)
->>>>>>> e9a121c037c897a96cfdeb4a8770c9b1bd77a82d
                 node_id = click_data['points'][0]['id']
                 node_type = click_data['points'][0]['text']
 
