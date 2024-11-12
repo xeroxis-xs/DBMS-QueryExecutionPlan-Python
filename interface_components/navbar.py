@@ -1,22 +1,29 @@
 import dash_bootstrap_components as dbc
+from dash import html
 
 
 def navbar():
     return dbc.NavbarSimple(
         children=[
-            dbc.NavItem(dbc.NavLink("Page 1", href="#")),
-            dbc.DropdownMenu(
+            dbc.NavItem(dbc.NavLink(
                 children=[
-                    dbc.DropdownMenuItem("More pages", header=True),
-                    dbc.DropdownMenuItem("Page 2", href="#"),
-                    dbc.DropdownMenuItem("Page 3", href="#"),
+                    html.I(className="bi bi-book me-2"),
+                    "PostgreSQL Documentation (EXPLAIN)",
+
                 ],
-                nav=True,
-                in_navbar=True,
-                label="More",
-            ),
+                href="https://www.postgresql.org/docs/current/using-explain.html",
+                target="_blank"
+            )),
+            dbc.NavItem(dbc.NavLink(
+                children=[
+                    html.I(className="bi bi-github me-2"),  # Add Bootstrap icon here
+                    "GitHub Repo",
+                ],
+                href="https://github.com/xeroxis-xs/DBMS-QueryExecutionPlan-Python",
+                target="_blank"
+            )),
         ],
-        brand="QEP",
+        brand="SC3020 Group Project 2 | Group 4",
         brand_href="#",
         color="primary",
         dark=True,

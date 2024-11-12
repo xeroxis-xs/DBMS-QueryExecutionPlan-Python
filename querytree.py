@@ -1,6 +1,7 @@
 import math
-import queue
-class query_tree:
+
+
+class QueryTree:
     def __init__(self, head_node = None, total_cost = 0, total_rows = 0, total_width = 0):
         self.head_node = head_node
         self.total_cost = total_cost
@@ -8,7 +9,9 @@ class query_tree:
         self.total_width = total_width
 
     def print_query_tree(node):
-        # Print the current node's details with indentation based on the level
+        """
+        Print the current node's details with indentation based on the level in the tree
+        """
         indent = "----" * node.level  # 4 spaces per level for indentation
         print(f"{indent}{node.operator} (cost={node.cost}, rows={node.rows}, width={node.width})", end= '')
         
@@ -19,9 +22,10 @@ class query_tree:
         
         # Recursively print each child node at the next indentation level
         for child in node.children:
-            query_tree.print_query_tree(child)
+            QueryTree.print_query_tree(child)
 
-class query_node:
+
+class QueryNode:
     def __init__(self, operator : str, level : int, cost, rows, width):
         self.operator = operator
         self.cost = cost
@@ -31,7 +35,11 @@ class query_node:
         self.level = level
         self.children = []
 
+
 def create_query_tree(plan):
+    """
+    Create a query tree from the QEP
+    """
     head_node = None
     stack = []  # Stack to track the parent nodes
     total_rows = 0
@@ -61,7 +69,7 @@ def create_query_tree(plan):
             continue
 
         # Create a new QueryNode
-        new_node = query_node(operator=operator, level= nesting_level, cost=cost, rows=rows, width=width)
+        new_node = QueryNode(operator=operator, level= nesting_level, cost=cost, rows=rows, width=width)
 
         # If it's the first node, set it as the head node
         if head_node is None:
@@ -77,5 +85,5 @@ def create_query_tree(plan):
 
         # Add the new node to the stack at the current level
         stack.append(new_node)
-    qtree = query_tree(head_node, total_cost, total_rows, total_width)
+    qtree = QueryTree(head_node, total_cost, total_rows, total_width)
     return qtree

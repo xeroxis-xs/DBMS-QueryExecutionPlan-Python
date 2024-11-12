@@ -1,9 +1,6 @@
+from db.db import Database
 
-from  db.db import Database
-
-
-
-#commands for default postgresql settings
+# Commands for default postgresql settings
 reset_commands = [
     "SET enable_bitmapscan = on;",
     "SET enable_gathermerge = on;",
@@ -19,53 +16,60 @@ reset_commands = [
     "SET enable_tidscan = on;"
 ]
 
-def execute_commands(db : Database, commands : list[str]):
-    #return if there are no commands
+
+# Function to execute a list of commands
+def execute_commands(db: Database, commands: list[str]):
+    # return if there are no commands
     if not commands:
         return
-    #loop through each command and execute them
+    # loop through each command and execute them
     for command in commands:
         db.cursor.execute(command)
-    #commit the changes
+    # commit the changes
     db.conn.commit()
 
-def whatif_query(db : Database, query : str, join : str, scan : str, aggregate: str):
+
+# Function to execute a whatif query
+def whatif_query(db: Database, query: str, join: str, scan: str, aggregate: str):
     commands = []
-    #check for whatif queries regarding join
+    # check for whatif queries regarding join
     if join != 'none':
-        #disable all other joins apart from hash join
+        # disable all other joins apart from hash join
         if join == "hash":
             commands.extend(["SET enable_mergejoin = off;", "SET enable_nestloop = off;"])
-        #disable all other joins apart from merge join
+        # disable all other joins apart from merge join
         elif join == "merge":
             commands.extend(["SET enable_hashjoin = off;", "SET enable_nestloop = off;"])
-        #disable all other joins apart from nested loop join
+        # disable all other joins apart from nested loop join
         elif join == "nested":
             commands.extend(["SET enable_mergejoin = off;", "SET enable_hashjoin = off;"])
-    #check for whatif queries regarding scan
+    # check for whatif queries regarding scan
     if scan != 'none':
-        #disable all other scan options apart from seqscan
+        # disable all other scan options apart from seqscan
         if scan == "seq":
-            commands.extend(["SET enable_indexscan = off;", "SET enable_indexonlyscan = off;", "SET enable_bitmapscan = off;", "SET enable_tidscan = off;"])
-        #disable all other scan options apart from index scan
+            commands.extend(
+                ["SET enable_indexscan = off;", "SET enable_indexonlyscan = off;", "SET enable_bitmapscan = off;",
+                 "SET enable_tidscan = off;"])
+        # disable all other scan options apart from index scan
         elif scan == "index":
             commands.extend(["SET enable_seqscan = off;", "SET enable_bitmapscan = off;", "SET enable_tidscan = off;"])
-        #disable all other scan options apart from bitmap scan
+        # disable all other scan options apart from bitmap scan
         elif scan == "bitmap":
-            commands.extend(["SET enable_indexscan = off;", "SET enable_indexonlyscan = off;", "SET enable_seqscan = off;", "SET enable_tidscan = off;"])
-    #check for whatif queries regarding aggregation
+            commands.extend(
+                ["SET enable_indexscan = off;", "SET enable_indexonlyscan = off;", "SET enable_seqscan = off;",
+                 "SET enable_tidscan = off;"])
+    # check for whatif queries regarding aggregation
     if aggregate != 'hash':
-        #disable hash aggregation
+        # disable hash aggregation
         if aggregate == "no_hash":
             commands.append("SET enable_hashagg = off;")
-    #configure the new settings
+    # configure the new settings
     execute_commands(db, commands)
 
-    #get qep with the new configurations
+    # get qep with the new configurations
     qep, qep_cost, qep_rows, execution_time, error = db.get_qep(query)
 
-    #restore default settings
+    # restore default settings
     execute_commands(db, reset_commands)
 
     return qep, qep_cost, qep_rows, execution_time, error
-
