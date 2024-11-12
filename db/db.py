@@ -13,8 +13,10 @@ class Database:
         self.conn = None
         self.cursor = None
 
-    # Connect to the database
     def connect(self):
+        """
+        Connect to the database
+        """
         self.conn = psycopg2.connect(
             dbname=self.db_name,
             user=self.db_user,
@@ -25,12 +27,18 @@ class Database:
         self.cursor = self.conn.cursor()
 
     def close(self):
+        """
+        Close the database connection
+        """
         if self.cursor:
             self.cursor.close()
         if self.conn:
             self.conn.close()
 
     def execute_query(self, query, params=None):
+        """
+        Execute a query and return the result
+        """
         try:
             start_time = time.time()
             self.cursor.execute(query, params)
@@ -51,6 +59,9 @@ class Database:
 
 
     def list_all_tables(self):
+        """
+        List all tables in the database
+        """
         query = """
             SELECT table_schema, table_name
             FROM information_schema.tables
@@ -60,6 +71,9 @@ class Database:
         return self.execute_query(query)
 
     def list_columns(self, schema, table):
+        """
+        List all columns in a table
+        """
         query = """
             SELECT column_name
             FROM information_schema.columns
@@ -69,6 +83,9 @@ class Database:
         return self.execute_query(query, (schema, table))
 
     def get_rows(self, schema, table):
+        """
+        Get the number of rows in a table
+        """
         start_time = time.time()
         query = f"SELECT COUNT(*) FROM {schema}.{table};"
         self.cursor.execute(query)
@@ -77,16 +94,17 @@ class Database:
         return row_count, execution_time
 
     def analyze(self):
+        """
+        Analyze the database
+        """
         query = "ANALYZE;"
         return self.execute_query(query)
 
     def get_qep(self, query):
         """
-        Get the query execution plan for a given SQL query in JSON format
-        :param query: SQL query
-        :return: JSON formatted query execution plan
+        Get the query execution plan (QEP) for a query
         """
-        query = f"EXPLAIN (FORMAT JSON, ANALYZE) {query}"
+        query = f"EXPLAIN (FORMAT JSON) {query}"
         result, execution_time, error, _ = self.execute_query(query)
         # Extract the total cost of the top-level plan
         qep_cost = None

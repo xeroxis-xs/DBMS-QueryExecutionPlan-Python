@@ -1,16 +1,14 @@
-from dash import Dash, html, dcc, callback_context, Output, Input, State
+from dash import Dash, html, dcc, Output, Input, State
 import dash_bootstrap_components as dbc
 from interface_components.navbar import navbar
 from interface_components.graph_plot import GraphPlot
-from interface_components.graph_plot import GraphPlot
 from db.db import Database
+from db.query_list import query_template_list
 from preprocessing import Graph
 import pandas as pd
 import psycopg2
 import plotly.graph_objs as go
-import plotly.graph_objs as go
 import feffery_markdown_components as fmc
-import json
 import json
 from whatif import whatif_query
 
@@ -19,7 +17,7 @@ class Interface:
     def __init__(self):
         self.app = Dash(
             __name__,
-            external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP],
+            external_stylesheets=[dbc.themes.ZEPHYR, dbc.icons.BOOTSTRAP],
         )
         self.set_layout()
         self.set_callbacks()
@@ -35,7 +33,7 @@ class Interface:
             navbar(),
             dbc.Container([
                 dbc.Row([
-                    html.H2("Query Execution Plan"),
+                    html.H3("DBMS Query Execution Plan"),
                 ], className="my-5"),
                 dbc.Row([
                     dbc.Col([
@@ -101,6 +99,14 @@ class Interface:
                                             hover=True,
                                             responsive=True,
                                             striped=True,
+                                            style={
+                                                "fontSize": "14px",
+                                                "padding": "2px",
+                                                "margin": "0",
+                                                "whiteSpace": "nowrap",
+                                                "overflow": "hidden",
+                                                "textOverflow": "ellipsis",
+                                            }
                                         )
                                     ]
                                 )
@@ -116,11 +122,25 @@ class Interface:
                         ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
 
                         dbc.Row([
+                            dbc.Label("Query Template", html_for="query-template", className="mb-3"),
+                            dbc.Col(
+                                dbc.Select(
+                                    id="query-template",
+                                    placeholder="Select a query template",
+                                    value=query_template_list[0]["value"],
+                                    options=query_template_list,
+                                ),
+                            )
+                        ], className="mb-3"),
+
+                        dbc.Row([
+                            dbc.Label("Query", html_for="query-input", className="mb-3"),
                             dbc.Col(
                                 dbc.Textarea(
                                     id="query-input",
                                     placeholder="Enter SQL query",
-                                    value="SELECT * FROM customer C,  orders O WHERE C.c_custkey = O.o_custkey AND C.c_custkey <=10"
+                                    rows=5,
+                                    value=query_template_list[0]["value"]
                                 ),
                             ),
                         ], className="mb-3"),
@@ -177,9 +197,9 @@ class Interface:
                                         html.P(id="qep-time-taken", className="my-3"),
                                         fmc.FefferyMarkdown(
                                             id="qep-output",
-                                            codeTheme="atom-dark",
-                                            codeBlockStyle={"max-height": "500px"},
-                                            codeStyle={"font-size": "14px"}
+                                            # codeTheme="coy",
+                                            codeBlockStyle={"maxHeight": "488px"},
+                                            codeStyle={"fontSize": "14px", "lineHeight": "1.5"},
                                         ),
                                     ]
                                 ),
@@ -208,20 +228,8 @@ class Interface:
                                         ]),
                                     ]
                                 ),
-
                             ),
                         ], className="mb-3"),
-                        dbc.Row(id="dropdown-container", className="mb-3", children=[
-                            dbc.Label(f"Select a Node", html_for="dropdown", width=3),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='dropdown',
-                                    value='',
-                                    disabled=True
-                                ),
-                                width=6)
-                        ]),
-                        dbc.Button(["Apply Changes", html.I(className="bi bi-check2-all ms-2")], id="apply-changes-button", color="primary", className="my-3", style={"display": "none"}),
                     ], width=6),
                 ]),
                 # What-If Queries Section
@@ -232,61 +240,70 @@ class Interface:
                             html.B("What-If Queries")
                         ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
                         dbc.Row([
-                            dbc.Label("Select Join Type:", html_for="join-type-dropdown", width=3),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='join-type-dropdown',
-                                    options=[
-                                        {'label': 'No modification', 'value' : 'none'},
-                                        {'label': 'Hash Join', 'value': 'hash'},
-                                        {'label': 'Merge Join', 'value': 'merge'},
-                                        {'label': 'Nested Loop Join', 'value': 'nested'}
-                                    ],
-                                    value='none'
-                                ),
-                                width=9
-                            ),
-                        ], className="mb-3"),
-                        dbc.Row([
-                            dbc.Label("Select Scan Type:", html_for="scan-type-dropdown", width=3),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='scan-type-dropdown',
-                                    options=[
-                                        {'label': 'No modification', 'value' : 'none'},
-                                        {'label': 'Sequential Scan', 'value': 'seq'},
-                                        {'label': 'Index Scan', 'value': 'index'},
-                                        {'label': 'Bitmap Scan', 'value': 'bitmap'}
-                                    ],
-                                    value='none'
-                                ),
-                                width=9
-                            ),
-                        ], className="mb-3"),
-                        dbc.Row([
-                            dbc.Label("Select Aggregate Type:", html_for="aggregate-type-dropdown", width=3),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='aggregate-type-dropdown',
-                                    options=[
-                                        {'label': 'No modification', 'value': 'hash'},
-                                        {'label': 'Disable Hash Aggregate', 'value': 'no_hash'}
-                                    ],
-                                    value='hash'
-                                ),
-                                width=9
-                            ),
-                        ], className="mb-3"),
+                            dbc.Col([
+                                dbc.Row([
+                                    dbc.Label("Alternate Join Type", html_for="join-type-dropdown", width=6),
+                                    dbc.Col(
+                                        dbc.Select(
+                                            id='join-type-dropdown',
+                                            options=[
+                                                {'label': 'No modification', 'value': 'none'},
+                                                {'label': 'Hash Join', 'value': 'hash'},
+                                                {'label': 'Merge Join', 'value': 'merge'},
+                                                {'label': 'Nested Loop Join', 'value': 'nested'}
+                                            ],
+                                            value='none',
+                                        ),
+                                        width=6
+                                    ),
+                                ]),
+                            ], className="mb-3", width=6),
+                            dbc.Col([
+                                dbc.Row([
+                                    dbc.Label("Alternate Scan Type", html_for="scan-type-dropdown", width=6),
+                                    dbc.Col(
+                                        dbc.Select(
+                                            id='scan-type-dropdown',
+                                            options=[
+                                                {'label': 'No modification', 'value': 'none'},
+                                                {'label': 'Sequential Scan', 'value': 'seq'},
+                                                {'label': 'Index Scan', 'value': 'index'},
+                                                {'label': 'Bitmap Scan', 'value': 'bitmap'}
+                                            ],
+                                            value='none',
+                                        ),
+                                        width=6
+                                    ),
+                                ]),
+                            ], className="mb-3", width=6),
+                            dbc.Col([
+                                dbc.Row([
+                                    dbc.Label("Alternate Aggregate Type", html_for="aggregate-type-dropdown", width=6),
+                                    dbc.Col(
+                                        dbc.Select(
+                                            id='aggregate-type-dropdown',
+                                            options=[
+                                                {'label': 'No modification', 'value': 'hash'},
+                                                {'label': 'Disable Hash Aggregate', 'value': 'no_hash'}
+                                            ],
+                                            value='hash',
+                                        ),
+                                        width=6
+                                    ),
+                                ]),
+                            ], className="mb-3", width=6),
+                        ]),
                         dbc.Button(["Execute What-If Query", html.I(className="bi bi-play-fill ms-2")],
-                                id="execute-whatif-query-btn", color="primary", className="my-3"),
+                                   id="execute-whatif-query-btn", color="primary", className="my-3", disabled=True),
+
                         dbc.Alert(id="whatif-query-status", color="info", is_open=False),
                     ], width=12),
-                ], className="mb-5"),
+                ], className="mb-3"),
 
                 dbc.Row([
                     dbc.Col([
                         html.H5([
-                            html.B("What-If QEP")
+                            html.B("AQP")
                         ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
                         dbc.Row([
                             dbc.Col(
@@ -294,7 +311,12 @@ class Interface:
                                     id="loading-whatif-qep",
                                     type="default",
                                     children=[
-                                        html.Div(id="whatif-qep-output", style={"maxHeight": "500px", "overflowY": "auto"})  # Display What-If QEP JSON
+                                        fmc.FefferyMarkdown(
+                                            id="whatif-qep-output",
+                                            # codeTheme="coy",
+                                            codeBlockStyle={"maxHeight": "542px"},
+                                            codeStyle={"fontSize": "14px", "lineHeight": "1.5"},
+                                        ),
                                     ]
                                 ),
                             )
@@ -303,7 +325,7 @@ class Interface:
 
                     dbc.Col([
                         html.H5([
-                            html.B("What-If QEP Graph")
+                            html.B("AQP Graph")
                         ], className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
                         dbc.Row([
                             dbc.Col(
@@ -321,7 +343,7 @@ class Interface:
                             )
                         ], className="mb-3"),
                     ], width=6),
-                ]),
+                ], className="mb-5"),
 
                 dbc.Row(className="py-5"),
             ]),
@@ -395,13 +417,20 @@ class Interface:
                 table_children = table_header + table_body
 
                 return ([html.I(className="bi bi-check-circle-fill me-2"), "Connected successfully! "],
-                        "success", True, table_children, f"Time taken: {round(time_taken * 1000)} milliseconds", False,
+                        "success", True, table_children, f"Time taken: {round(time_taken * 1000):,} ms", False,
                         False)
             except psycopg2.OperationalError as e:
                 print(f"Connection failed: {e}")
                 return ([html.I(className="bi bi-x-octagon-fill me-2"), "Connection failed:",
                          fmc.FefferyMarkdown(markdownStr=f"```sh\n{e}\n```", codeTheme="atom-dark", className="mt-3")],
                         "danger", True, [], "", True, True)
+
+        @self.app.callback(
+            Output("query-input", "value"),
+            Input("query-template", "value")
+        )
+        def update_query_input(selected_template):
+            return selected_template
 
         @self.app.callback(
             Output("query-status", "children"),
@@ -436,14 +465,17 @@ class Interface:
                             "fontSize": "14px",
                             "padding": "2px",
                             "margin": "0",
+                            "whiteSpace": "nowrap",
+                            "overflow": "hidden",
+                            "textOverflow": "ellipsis",
                         }
                     )
                     return [html.I(className="bi bi-check-circle-fill me-2"),
-                            "Query executed successfully!"], "success", True, table, f"Time taken: {round(time_taken * 1000)} milliseconds", f"Rows returned: {rows}"
+                            "Query executed successfully!"], "success", True, table, f"Time taken: {round(time_taken * 1000):,} ms", f"Rows returned: {rows}"
                 else:
                     return [html.I(className="bi bi-check-circle-fill me-2"),
                             "Query executed successfully!"], "success", True, html.P(
-                        "Query executed successfully!"), f"Time taken: {round(time_taken * 1000)} milliseconds", "No rows returned"
+                        "Query executed successfully!"), f"Time taken: {round(time_taken * 1000):,} ms", "No rows returned"
             except psycopg2.Error as e:
                 # Split error message by lines and format with HTML line breaks
                 return [
@@ -459,12 +491,13 @@ class Interface:
             Output("qep-output", "markdownStr"),
             Output("qep-time-taken", "children"),
             Output("show-qep-graph", "disabled"),
+            Output("execute-whatif-query-btn", "disabled"),
             Input("qep-button", "n_clicks"),
             State("query-input", "value"),
         )
         def get_qep(n_clicks, query):
             if n_clicks is None:
-                return "", "info", False, None, "", True
+                return "", "info", False, None, "", True, True
 
             try:
                 # Get the query execution plan
@@ -473,8 +506,9 @@ class Interface:
                 if error:
                     raise psycopg2.Error(error)
 
-                return [html.I(className="bi bi-check-circle-fill me-2"),
-                        "Query execution plan generated successfully!"], "success", True, f"```json\n{self.qep}\n```", f"Time taken: {round(time_taken * 1000)} milliseconds", False
+                return ([html.I(className="bi bi-check-circle-fill me-2"),
+                        "Query execution plan generated successfully!"], "success",
+                        True, f"```json\n{self.qep}\n```", f"Time taken: {round(time_taken * 1000):,} ms", False, False)
             except psycopg2.Error as e:
                 return [html.I(className="bi bi-x-octagon-fill me-2"), "Error generating query execution plan:",
                         fmc.FefferyMarkdown(markdownStr=f"```sh\n{str(e)}\n```", codeTheme="atom-dark",
@@ -499,114 +533,29 @@ class Interface:
                 graph.parse_qep(qep_dict)
                 # graph.print_graph()
                 graph_plot = GraphPlot(graph.build_graph())
-                return dcc.Graph(id="qep-interactive-graph", figure=graph_plot.plot_graph()), [
-                    html.I(className="bi bi-check-circle-fill me-2"),
-                    "QEP Graph generated successfully!"], "success", True, f'Query Cost: {self.qep_cost}', f'Query Planner Output Rows Estimate: {self.qep_rows}'
+                return (
+                    dcc.Graph(id="qep-interactive-graph", figure=graph_plot.plot_graph()),
+                    [
+                        html.I(className="bi bi-check-circle-fill me-2"),
+                        "QEP Graph generated successfully!"
+                    ],
+                    "success",
+                    True,
+                    html.Span([
+                        "QEP Query Cost: ",
+                        html.Strong(f'{round(self.qep_cost):,}')
+                    ]),
+                    f'Query Planner Output Rows Estimate: {self.qep_rows:,}'
+                )
             else:
                 return None, [html.I(className="bi bi-x-octagon-fill me-2"),
                               "No QEP available to generate graph"], "danger", True, "", ""
 
         @self.app.callback(
-            Output("dropdown-container", "children"),
-            Output("apply-changes-button", "style"),
-            Input("qep-interactive-graph", "clickData"),
-        )
-        def show_dropdown(click_data):
-            if click_data:
-                # print(click_data)
-                node_id = click_data['points'][0]['id']
-                node_type = click_data['points'][0]['text']
-
-                if node_type == 'Hash Join' or node_type == 'Merge Join' or node_type == 'Nested Loop':
-                    return [
-                        dbc.Row([
-                            dbc.Label(f"Operation", width=3),
-                            dbc.Col(children=html.B("Join Operation"), width=9, className="d-flex align-items-center"),
-                            ]),
-                        dbc.Row([
-                            dbc.Label(f"Node ID: {node_id}", html_for="dropdown", width=3),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='dropdown',
-                                    options=[
-                                        {'label': 'Hash Join', 'value': 'Hash Join'},
-                                        {'label': 'Merge Join', 'value': 'Merge Join'},
-                                        {'label': 'Nested Loop', 'value': 'Nested Loop'},
-                                    ],
-                                    value=node_type,
-                                ),
-                                width=9),
-                            ]),
-                    ], {"display": "block"}
-                elif node_type == 'Seq Scan' or node_type == 'Index Scan' or node_type == 'Bitmap Index Scan':
-                    return [
-                        dbc.Row([
-                            dbc.Label(f"Operation", width=3),
-                            dbc.Col(children=html.B("Scan Operation"), width=9, className="d-flex align-items-center"),
-                            ]),
-                        dbc.Row([
-                            dbc.Label(f"Node ID: {node_id}", html_for="dropdown", width=3),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='dropdown',
-                                    options=[
-                                        {'label': 'Seq Scan', 'value': 'Seq Scan'},
-                                        {'label': 'Index Scan', 'value': 'Index Scan'},
-                                        {'label': 'Bitmap Index (Multi-index) Scan', 'value': 'Bitmap Index Scan'},
-                                    ],
-                                    value=node_type,
-                                ),
-                                width=9),
-                            ]),
-                    ], {"display": "block"}
-
-                elif node_type == 'Hash' or node_type == 'Sort':
-                    return [
-                        dbc.Row([
-                            dbc.Label(f"Operation", width=3),
-                            dbc.Col(children=html.B("Aggregation Operation"), width=9, className="d-flex align-items-center"),
-                        ], className="mb-3"),
-                        dbc.Row([
-                            dbc.Label(f"Node ID: {node_id}", html_for="dropdown", width=3),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='dropdown',
-                                    options=[
-                                        {'label': 'Hash', 'value': 'Hash'},
-                                        {'label': 'Sort', 'value': 'Sort'},
-                                    ],
-                                    value=node_type,
-                                ),
-                                width=9),
-                            ]),
-                    ], {"display": "block"}
-                else:
-                    return [
-                        dbc.Row([
-                            dbc.Label(f"Operation", width=3),
-                            dbc.Col(children=html.B("Not covered in this project"), width=9, className="d-flex align-items-center"),
-                        ], className="mb-3"),
-                        dbc.Row([
-                            dbc.Label(f"Node {node_id}", html_for="dropdown", width=3),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='dropdown',
-                                    options=[
-                                        {'label': node_type, 'value': node_type},
-                                    ],
-                                    value=node_type,
-                                ),
-                                width=9),
-                            ]),
-                    ], {"display": "block"}
-            else:
-                return None, {"display": "none"}
-    
-        @self.app.callback(
             Output("whatif-query-status", "children"),
             Output("whatif-query-status", "color"),
             Output("whatif-query-status", "is_open"),
-            Output("whatif-qep-output", "children"),
+            Output("whatif-qep-output", "markdownStr"),
             Output("whatif-qep-graph", "children"),
             Output("whatif-cost", "children"),
             Output("cost_difference", "children"),
@@ -622,15 +571,14 @@ class Interface:
 
             try:
                 # Send the What-If parameters and query to the backend to get the new QEP
-                self.modified_qep, self.modified_qep_cost, modified_qep_rows, modified_execution_time, error = whatif_query(self.db, query, join_type, scan_type, aggregate_type)
+                self.modified_qep, self.modified_qep_cost, modified_qep_rows, modified_execution_time, error = whatif_query(
+                    self.db, query, join_type, scan_type, aggregate_type)
 
                 if error:
                     raise Exception(error)
 
                 # Displaying Updated QEP in JSON format
-                qep_markdown = fmc.FefferyMarkdown(
-                    markdownStr=f"```json\n{self.modified_qep}\n```", codeTheme="atom-dark", className="mt-3"
-                )
+                qep_markdown = f"```json\n{self.modified_qep}\n```"
 
                 # Creating QEP Graph from the retrieved graph data
                 if self.modified_qep:
@@ -639,13 +587,22 @@ class Interface:
                     modified_graph.parse_qep(modified_qep_dict)
                     modified_graph_plot = GraphPlot(modified_graph.build_graph())
                     modified_qep_graph = dcc.Graph(id="updated-qep-graph", figure=modified_graph_plot.plot_graph())
-                
-                perfomance_boost = 100 * (self.qep_cost - self.modified_qep_cost) / self.qep_cost 
+
+                perfomance_boost = 100 * (self.qep_cost - self.modified_qep_cost) / self.qep_cost
                 cost_string = "Perfomance Boost (%):" if perfomance_boost >= 0 else "Perfomance Fall (%):"
+
+                if perfomance_boost > 0:
+                    color = "success"
+                elif perfomance_boost < 0:
+                    color = "danger"
+                else:
+                    color = "body"
 
                 return [
                     html.I(className="bi bi-check-circle-fill me-2"), "What-If Query executed successfully!"
-                    ], "success", True, qep_markdown, modified_qep_graph, f'Whatif Query Cost: {self.modified_qep_cost}', f'{cost_string} {abs(perfomance_boost):.2f}'
+                ], "success", True, qep_markdown, modified_qep_graph, html.Span([
+                    "AQP Query Cost: ", html.Strong(f'{round(self.modified_qep_cost):,}')
+                ]), html.Span(f'{cost_string} {abs(perfomance_boost):.2f}', className=f'text-{color}')
 
             except Exception as e:
                 # Handle any errors that occurred
@@ -653,7 +610,7 @@ class Interface:
                     html.I(className="bi bi-x-octagon-fill me-2"),
                     "Error executing What-If query:",
                     fmc.FefferyMarkdown(markdownStr=f"```sh\n{str(e)}\n```", codeTheme="atom-dark",
-                    className="mt-3")], "danger", True, "", "", "", ""
+                                        className="mt-3")], "danger", True, "", "", "", ""
 
     def run(self):
         self.app.run(debug=True)

@@ -1,3 +1,37 @@
-#qep-interactive-graph > div.js-plotly-plot > div.plot-container > div.user-select-none > svg.main-svg > g.draglayer {
-    cursor: pointer !important;
+/*#qep-interactive-graph > div.js-plotly-plot > div.plot-container > div.user-select-none > svg.main-svg > g.draglayer {*/
+/*    cursor: pointer !important;*/
+/*}*/
+.markdown-body {
+    background-color: transparent !important;
+    color-scheme: light;
+}
+
+.table>:not(caption)>*>* {
+    padding: 0.5rem 0.5rem !important;
+}
+
+#qep-interactive-graph {
+    background-color: #F6F8FA;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgb(221, 221,221);
+    border-style: solid;
+    height: 100%;
+}
+
+#updated-qep-graph {
+    background-color: #F6F8FA;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgb(221, 221,221);
+    border-style: solid;
+    height: 100%;
+}
+
+#loading-connection {
+    margin-top: 30px;
+}
+
+.main-svg {
+    background-color: transparent !important;
 }

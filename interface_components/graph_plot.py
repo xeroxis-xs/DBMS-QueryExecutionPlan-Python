@@ -39,7 +39,9 @@ class GraphPlot:
         return _hierarchy_pos(G, root, 0, width, vert_loc, xcenter, {})
 
     def plot_graph(self):
-
+        """
+        Plot the graph using Plotly
+        """
         pos = self.hierarchy_pos(self.G)  # Ensure self.G is passed correctly
         edge_x = []
         edge_y = []
@@ -83,8 +85,8 @@ class GraphPlot:
             ),
             marker=dict(
                 size=20,
-                color=node_color,  # Set color to the list of costs
-                colorscale='Reds',  # Use a blue color scale
+                color=node_color,
+                colorscale='Reds',
                 colorbar=dict(
                     title='Cost',
                     len=1,

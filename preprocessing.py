@@ -1,5 +1,4 @@
 import networkx as nx
-import plotly.graph_objects as go
 
 
 class Graph:
@@ -10,7 +9,9 @@ class Graph:
         self.node_counter = 0  # for ID generation
 
     def parse_qep(self, qep):
-        """Parse the QEP JSON into a format suitable for NetworkX."""
+        """
+        Parse the query execution plan (QEP) and build the nodes and edges for the graph.
+        """
 
         def traverse_plan(plan_tree, parent_id=None):
             node_id = self.node_counter  # Use the counter as the node ID
@@ -44,13 +45,15 @@ class Graph:
         traverse_plan(root_plan)
 
     def print_graph(self):
+        """
+        Print the nodes and edges of the graph.
+        """
         print(self.nodes)
         print(self.edges)
 
     def build_graph(self):
         """
-        Build the NetworkX graph from the parsed nodes and edges.
-        :return:  The NetworkX graph
+        Build the graph from the nodes and edges.
         """
 
         for node in self.nodes:

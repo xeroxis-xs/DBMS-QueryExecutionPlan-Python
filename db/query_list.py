@@ -1,0 +1,8 @@
+query_template_list = [
+    {"label": "Default", "value": "SELECT * FROM customer C, orders O WHERE C.c_custkey = O.o_custkey"},
+    {"label": "Query 1", "value": "SELECT sum(l_extendedprice * l_discount) AS revenue FROM lineitem WHERE l_shipDATE >= DATE '1997-01-01' AND l_shipDATE < DATE '1997-01-01' + INTERVAL '1' YEAR AND l_discount between 0.09 - 0.01 AND 0.09 + 0.01 AND l_quantity < 24"},
+    {"label": "Query 2", "value": "SELECT sum(l_extendedprice) / 7.0 AS avg_yearly FROM lineitem, part WHERE p_partkey = l_partkey AND p_brAND = 'Brand#55' AND p_container = 'WRAP CAN' AND l_quantity < ( SELECT 0.2 * avg(l_quantity) FROM lineitem WHERE l_partkey = p_partkey )"},
+    {"label": "Query 3", "value": "SELECT 100.00 * sum(CASE WHEN p_type LIKE 'PROMO%' THEN l_extendedprice * (1 - l_discount) else 0 end) / sum(l_extendedprice * (1 - l_discount)) AS promo_revenue FROM lineitem, part WHERE l_partkey = p_partkey AND l_shipDATE >= DATE '1994-11-01' AND l_shipDATE < DATE '1994-11-01' + INTERVAL '1' MONTH"},
+    {"label": "Query 4", "value": "SELECT c_count, count(*) AS custdist FROM ( SELECT c_custkey, count(o_orderkey) FROM customer left outer join orders on c_custkey = o_custkey AND o_comment NOT LIKE '%pending%deposits%' GROUP BY c_custkey ) AS c_orders (c_custkey, c_count) GROUP BY c_count ORDER BY custdist DESC, c_count DESC"},
+    {"label": "Query 5", "value": "SELECT sum(l_extendedprice) / 7.0 AS avg_yearly FROM lineitem, part WHERE p_partkey = l_partkey AND p_brAND = 'Brand#33' AND p_container = 'JUMBO PKG' AND l_quantity < ( SELECT 0.2 * avg(l_quantity) FROM lineitem WHERE l_partkey = p_partkey )"}
+]
