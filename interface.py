@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, Output, Input, State
+from dash import Dash, html, dcc, Output, Input, State, callback_context, MATCH, ALL
 import dash_bootstrap_components as dbc
 from interface_components.navbar import navbar
 from interface_components.graph_plot import GraphPlot
@@ -10,7 +10,7 @@ import psycopg2
 import plotly.graph_objs as go
 import feffery_markdown_components as fmc
 import json
-from whatif import whatif_query
+from whatif import whatif_query, modify_join_order, get_modifiable_list
 
 
 class Interface:
@@ -25,6 +25,7 @@ class Interface:
         self.qep = None
         self.qep_cost = None
         self.qep_rows = None
+        self.modified_query = None
         self.modified_qep = None
         self.modified_qep_cost = None
 
@@ -232,6 +233,48 @@ class Interface:
                         ], className="mb-3"),
                     ], width=6),
                 ]),
+                #Join Order Section
+                html.Hr(),
+                dbc.Row([
+                    dbc.Col([
+                        html.H5("Explore Join Orders", className="bg-light text-dark p-3 py-3 rounded-3 mb-3"),
+                        dbc.Button("Explore Join Orders", id="explore-join-order-btn", color="primary", className="my-3"),
+                        dcc.Loading(
+                            id="loading-join-orders",
+                            type="default",
+                            children=[
+                                html.Div(id="sortable-join-order-container"),
+                            ]
+                        ),
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    dbc.Button("Submit Changed Join Orders", id="submit-join-order-btn", color="primary", className="my-3"),
+                                    width="auto"
+                                ),
+                                dbc.Col(
+                                    dbc.Button("Keep Original Join Order", id="keep-original-query-btn", color="primary", className="my-3"),
+                                    width="auto"
+                                ),
+                            ],
+                            className="g-2",  # Add spacing between the buttons
+                        ),
+                        dcc.Loading(
+                            id= 'loading-new-join-query',
+                            type='default',
+                            children=[
+                                html.Div(id='new-join-order-query', className='mt-4 p-3 bg-light border rounded',
+                                         children= [
+                                             html.H5("Modified SQL Query:", className='mt-4'),
+                                             fmc.FefferyMarkdown(
+                                                id= 'new-join-query-markdown',
+                                                codeTheme="atom-dark", 
+                                                className="mt-3")  
+                                         ])
+                            ]
+                        )
+                    ], width=12),
+                ]),
                 # What-If Queries Section
                 html.Hr(),
                 dbc.Row([
@@ -299,7 +342,20 @@ class Interface:
                         dbc.Alert(id="whatif-query-status", color="info", is_open=False),
                     ], width=12),
                 ], className="mb-3"),
-
+                dcc.Loading(
+                    id= 'loading-final-query',
+                    type='default',
+                    children=[
+                        html.Div(id='final-query', className='mt-4 p-3 bg-light border rounded',
+                                 children= [
+                                     html.H5("Final SQL Query with all Settings:", className='mt-4'),
+                                     fmc.FefferyMarkdown(
+                                        id= 'final-query-markdown',
+                                        codeTheme="atom-dark",
+                                        className="mt-3" )
+                                 ])
+                    ]
+                ),
                 dbc.Row([
                     dbc.Col([
                         html.H5([
@@ -551,7 +607,81 @@ class Interface:
                 return None, [html.I(className="bi bi-x-octagon-fill me-2"),
                               "No QEP available to generate graph"], "danger", True, "", ""
 
+        # To show the join order options   
         @self.app.callback(
+        Output('sortable-join-order-container', 'children'),
+        Output('submit-join-order-btn', 'style'),
+        Output("keep-original-query-btn", 'style'),
+        Input('explore-join-order-btn', 'n_clicks'),
+        State('query-input', 'value'),
+        )
+        def display_join_orders(n_clicks, query):
+            if n_clicks is None or n_clicks == 0:
+                return None, {"display": "none"}, {"display": "none"}
+
+            # Get join order from backend
+            join_orders = get_modifiable_list(query)
+
+            order_elements = []
+            count = 0
+            for idx, join_order in enumerate(join_orders):
+
+                # Wrap each join order in a Bootstrap Card for better UI
+                order_elements.append(
+                    dbc.Card(
+                        dbc.CardBody([
+                            html.H6(f"From Clause for modification: FROM {join_order}", className="card-title"),
+                            dcc.Textarea(
+                                id={'type': 'join-order-textarea', 'index': idx},  # Dictionary-based ID
+                                value= join_order,
+                                style={"width": "100%", "height": "100px"},
+                                className="my-3",
+                            )
+                        ]),
+                        className="mb-4 shadow-sm"
+                    )
+                )
+            
+            if len(order_elements) == 0:
+                error_message = dbc.Alert(
+                    "Join Order change not available for this query",
+                    color="danger",  # Set the alert theme to "danger" for an error message
+                    className="my-3"
+                )
+                self.modified_query = None
+                return error_message, {"display": "none"}, {"display": "none"}
+                
+            return order_elements, {"display": "block"}, {"display": "block"}
+
+        @self.app.callback(
+            Output('new-join-query-markdown', 'markdownStr'),
+            [Input('submit-join-order-btn', 'n_clicks'),
+            Input('keep-original-query-btn', 'n_clicks')],
+            State({'type': 'join-order-textarea', 'index': ALL}, 'value'),
+            State("query-input", "value"),
+            prevent_initial_call=True
+        )
+        def generate_new_sql_query(n_clicks_m, n_clicks_o, updated_orders, query):
+            ctx = callback_context
+            if not ctx:
+                return None
+            
+            triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+            if triggered_id == 'keep-original-query-btn' and (n_clicks_o is not None or n_clicks_o != 0):
+                self.modified_query = query
+
+            elif triggered_id == 'submit-join-order-btn' and n_clicks_m is not None or n_clicks_m != 0:
+                updated_orders = [order.split(',') for order in updated_orders]
+                self.modified_query = modify_join_order(query, updated_orders)
+            else:
+                return None
+
+            return f"```sql\n{self.modified_query}\n```"
+        
+        
+        @self.app.callback(
+            Output('final-query-markdown', 'markdownStr'),
             Output("whatif-query-status", "children"),
             Output("whatif-query-status", "color"),
             Output("whatif-query-status", "is_open"),
@@ -563,16 +693,19 @@ class Interface:
             State("join-type-dropdown", "value"),
             State("scan-type-dropdown", "value"),
             State("aggregate-type-dropdown", "value"),
-            State("query-input", "value"),
+            State("query-input", "value")
         )
         def execute_whatif_query(n_clicks, join_type, scan_type, aggregate_type, query):
             if n_clicks is None:
-                return "", "info", False, "", "", "", ""
-
+                return None, "", "info", False, "", "", "", ""
+            change_order = False
+            if self.modified_query is not None:
+                query = self.modified_query
+                change_order = True
             try:
                 # Send the What-If parameters and query to the backend to get the new QEP
-                self.modified_qep, self.modified_qep_cost, modified_qep_rows, modified_execution_time, error = whatif_query(
-                    self.db, query, join_type, scan_type, aggregate_type)
+                self.modified_qep, self.modified_qep_cost, modified_qep_rows, modified_execution_time, error, new_query = whatif_query(
+                    self.db, query, join_type, scan_type, aggregate_type, change_order)
 
                 if error:
                     raise Exception(error)
@@ -597,8 +730,9 @@ class Interface:
                     color = "danger"
                 else:
                     color = "body"
+                #print("new query: ", new_query, "\n")
 
-                return [
+                return f"```sql\n{new_query}\n```",[
                     html.I(className="bi bi-check-circle-fill me-2"), "What-If Query executed successfully!"
                 ], "success", True, qep_markdown, modified_qep_graph, html.Span([
                     "AQP Query Cost: ", html.Strong(f'{round(self.modified_qep_cost):,}')
@@ -606,7 +740,7 @@ class Interface:
 
             except Exception as e:
                 # Handle any errors that occurred
-                return [
+                return None, [
                     html.I(className="bi bi-x-octagon-fill me-2"),
                     "Error executing What-If query:",
                     fmc.FefferyMarkdown(markdownStr=f"```sh\n{str(e)}\n```", codeTheme="atom-dark",
