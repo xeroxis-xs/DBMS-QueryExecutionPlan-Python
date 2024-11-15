@@ -27,4 +27,5 @@ def navbar():
         brand_href="#",
         color="primary",
         dark=True,
+        sticky="top",
     )
