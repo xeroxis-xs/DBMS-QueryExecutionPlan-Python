@@ -30,25 +30,27 @@ def execute_commands(db: Database, commands: list[str]):
     # commit the changes
     db.conn.commit()
 
-def get_modifiable_list(query: str):
+
+# Function to get the list of tables that can be modified
+def get_modifiable_list(query_string: str):
     regex = r"\bFROM\b\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)"
 
-    matches = re.findall(regex, query, re.IGNORECASE)
+    matches = re.findall(regex, query_string, re.IGNORECASE)
     print(matches)
     matches = [match for match in matches if len(re.findall(',', match)) > 0]
     return matches
 
 
-#Function to modify the join Order
-def modify_join_order(query: str, join_order: list[list]):
+# Function to modify the join order of the query
+def modify_join_order(query_string: str, join_order: list[list]):
     regex = r"\bFROM\b\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)"
 
-    matches = re.findall(regex, query, re.IGNORECASE)
+    matches = re.findall(regex, query_string, re.IGNORECASE)
     matches = [match for match in matches if len(re.findall(',', match)) > 0]
     join_str = [" NATURAL JOIN ".join(join_order_tables) for join_order_tables in join_order]
     for i in range(len(matches)):
-        query = query.replace(matches[i], join_str[i], 1)
-    return query
+        query_string = query_string.replace(matches[i], join_str[i], 1)
+    return query_string
 
 
     
