@@ -1,6 +1,7 @@
 from dash import Dash, html, dcc, Output, Input, State, callback_context, MATCH, ALL
 import dash_bootstrap_components as dbc
 from interface_components.navbar import navbar
+from interface_components.accordion import accordion
 from interface_components.graph_plot import GraphPlot
 from db.db import Database
 from db.query_list import query_template_list
@@ -397,7 +398,8 @@ class Interface:
                                         html.P(id="cost_difference", className="my-3"),
                                         html.Div(id="whatif-qep-graph", children=[
                                             dcc.Graph(id="updated-qep-graph", figure=go.Figure())
-                                        ])
+                                        ]),
+                                        html.Div(id="accordion-container")
                                     ]
                                 ),
                             )
@@ -717,6 +719,7 @@ class Interface:
             Output("whatif-cost", "children"),
             Output("cost_difference", "children"),
             Output("final-query-title", "children"),
+            Output("accordion-container", "children"),
             Input("execute-whatif-query-btn", "n_clicks"),
             State("join-type-dropdown", "value"),
             State("scan-type-dropdown", "value"),
@@ -725,7 +728,7 @@ class Interface:
         )
         def execute_whatif_query(n_clicks, join_type, scan_type, aggregate_type, query):
             if n_clicks is None:
-                return None, "", "info", False, "", "", "", "", None
+                return None, "", "info", False, "", "", "", "", None, None
             change_order = False
             if self.modified_query is not None:
                 query = self.modified_query
@@ -761,7 +764,7 @@ class Interface:
                     html.I(className="bi bi-check-circle-fill me-2"), "What-If Query executed successfully!"
                 ], "success", True, qep_markdown, modified_qep_graph, html.Span([
                     "AQP Query Cost: ", html.Strong(f'{round(self.modified_qep_cost):,}')
-                ]), html.Span(f'Performance: {performance:+.4f}%', className=f'text-{color}'), "Final Modified SQL Query:"
+                ]), html.Span(f'Performance: {performance:+.4f}%', className=f'text-{color}'), "Final Modified SQL Query:", accordion()
 
             except Exception as e:
                 # Handle any errors that occurred
@@ -769,7 +772,7 @@ class Interface:
                     html.I(className="bi bi-x-octagon-fill me-2"),
                     "Error executing What-If query:",
                     fmc.FefferyMarkdown(markdownStr=f"```sh\n{str(e)}\n```", codeTheme="atom-dark",
-                                        className="mt-3")], "danger", True, "", "", "", "", None
+                                        className="mt-3")], "danger", True, "", "", "", "", None, None
 
     def run(self):
         self.app.run(debug=True)
