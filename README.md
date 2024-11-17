@@ -7,6 +7,10 @@ The broad aims of the project are as follows:
 - Retrieve the estimated cost of the AQP and compare its cost with the QEP.
 
 ## Preview
+https://github.com/user-attachments/assets/8a4114e1-c352-4fab-90d3-b4cf415ba5b3
+
+[Video Demo](demo.mp4)
+
 <div style="text-align: center;">
     <img src="images/img_1.png" alt="Preview" width="500">
     <img src="images/img_2.png" alt="Preview" width="500">
