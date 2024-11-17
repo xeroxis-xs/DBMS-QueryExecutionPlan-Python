@@ -95,9 +95,7 @@ def whatif_query(db: Database, query: str, join: str, scan: str, aggregate: str,
     # configure the new settings
     execute_commands(db, commands)
 
-
-
-    # get qep with the new configurations
+    # Get qep with the new configurations
     try:
         qep, qep_cost, qep_rows, execution_time, error = db.get_qep(query)
     except Exception as e:
